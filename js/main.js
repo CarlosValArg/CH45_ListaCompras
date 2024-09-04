@@ -1,4 +1,5 @@
 const btnAgregar = document.getElementById("btnAgregar");
+const btnClear = document.getElementById("btnClear");
 const txtNombre = document.getElementById("Name");
 const txtNumber = document.getElementById("Number");
 const alertValidaciones = document.getElementById("alertValidaciones");
@@ -14,6 +15,8 @@ let contador = 0;
 let precio = 0;
 let costoTotal = 0;
 let totalEnProductos = 0;
+
+let datos = new Array();
 
 function validarCantidad(){
     if(txtNumber.value.length==0){
@@ -66,6 +69,15 @@ if(isValid){
                 <td>${txtNumber.value}</td>
                 <td>${precio}</td>
     </tr>`;
+
+    let elemento = {"contador":contador,
+                    "nombre": txtNombre.value,
+                    "cantidad": txtNumber.value,
+                    "precio":precio};
+
+    datos.push(elemento);
+    localStorage.setItem("datos",JSON.stringify(datos));
+
     cuerpoTabla.insertAdjacentHTML("beforeend", row);
     costoTotal += precio * Number(txtNumber.value);
     totalEnProductos += Number(txtNumber.value);
@@ -82,6 +94,34 @@ if(isValid){
 }/**is valid */
 
 });/**btnAgregar.addEventListener */
+
+btnClear.addEventListener("click",function(event){
+    event.preventDefault();
+    /**Limpiar el valor de los campos
+     * Limpiar el localStorage
+     * Limpiar la tabla
+     * Reiniciar las variables, contador, costoTotal, totalEnProductos
+     * Asignar las variables a los divs
+     * Ocultar la alerta
+     * Quitar los bordes
+     * Manda el foco al campo nombre
+     */
+    txtNombre.value="";
+    txtNumber.value="";
+    localStorage.clear();
+    cuerpoTabla.innerHTML="";
+    contador=0;
+    costoTotal=0;
+    totalEnProductos=0;
+    contadorProductos.innerText=contador;
+    productosTotal.innerText=totalEnProductos;
+    precioTotal.innerText="$ " + costoTotal.toFixed(2);
+    alertValidacionesTexto.innerHTML="";
+    alertValidaciones.style.display="none";
+    txtNombre.style.border="";
+    txtNumber.style.border="";
+    txtNumber.focus();
+})
 /**evento blur es cuando un campo pierde el foco, se sale del campo */
 txtNombre.addEventListener("blur", function(event){
     txtNombre.value = txtNombre.value.trim();
@@ -95,7 +135,25 @@ window.addEventListener("load", function(){
         contador=Number(this.localStorage.getItem("contador"));
     }/**null */
     if(this.localStorage.getItem("totalEnProductos") !=null){
-        totalEnProductos=Number(this.localStorage.getItem("totalEnProductos"))
+        totalEnProductos=Number(this.localStorage.getItem("totalEnProductos"));
+    }/**null */
+    if(this.localStorage.getItem("costoTotal") !=null){
+        costoTotal=Number(this.localStorage.getItem("costoTotal"));
     }
-}
-)
+    contadorProductos.innerText=contador;
+    productosTotal.innerText=totalEnProductos;
+    precioTotal.innerText="$ " + costoTotal.toFixed(2);
+
+    if(this.localStorage.getItem("datos") !=null){
+        datos = JSON.parse(this.localStorage.getItem("datos"));
+    }/**null */
+    datos.forEach(r => {
+        let row = `<tr>
+                        <td>${r.contador}</td>
+                        <td>${r.nombre}</td>
+                        <td>${r.cantidad}</td>
+                        <td>${r.precio}</td>
+                    </tr>`;
+        cuerpoTabla.insertAdjacentHTML("beforeend", row);
+    });
+});/**window load */
